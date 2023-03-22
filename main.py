@@ -1,38 +1,93 @@
-import random
+def editor():
+    options = {"plain": '',
+               "bold": '**',
+               "italic": '*',
+               "header": '',
+               "link": '',
+               "inline-code": '`',
+               "ordered-list": '',
+               "unordered-list": '',
+               "new-line": ''}
 
+    text_processed = ''
 
-def dinner_date():
-    guest_count = input("Enter the number of friends joining (including you): ")
-    guest_dictionary = {}
+    while True:
+        formatter = input("Choose a formatter: ")
 
-    if guest_count.isnumeric() and int(guest_count) > 0:
-        print("\nEnter the name of every friend (including you), each on a new line:")
+        if formatter == "!done":
+            with open('output.md', 'w') as file:
+                file.write(text_processed)
 
-        for _ in range(0, int(guest_count)):
-            guest_dictionary[input()] = 0
+            exit()
 
-        bill = input("\nEnter the total bill value: ")
+        elif formatter == "!help":
+            # seperator dictated by JetBrains task
+            print(f"Available formatters: {' '.join(str(x) for x in options.keys())}")
+            print("Special commands: !help !done")
 
-        lucky_mode = input('\nDo you want to use the "Who is lucky?" feature? Write Yes/No:')
-        lucky_person = random.choice(list(guest_dictionary.keys()))
+        elif formatter not in options.keys():
+            print("Unknown formatting type or command")
 
-        for guest in guest_dictionary.keys():
-            if lucky_mode == 'Yes':
-                if guest != lucky_person:
-                    guest_dictionary[guest] = round(int(bill) / (int(guest_count) - 1), 2)
+        elif formatter in options:
+            if formatter == 'new-line':
+                text_processed = f"{text_processed}\n"
+
+                print(text_processed)
+
+            elif formatter == 'link':
+                text_processed = f"{text_processed}[{input('Label: ')}]({input('URL: ')})"
+
+                print(text_processed)
+
+            elif formatter == 'header':
+                while True:
+                    level = int(input("Level: "))
+
+                    if level not in range(1, 6):
+                        print("The level should be within the range of 1 to 6")
+                        continue
+                    else:
+                        break
+
+                if text_processed == '':  # check whether this is the first line of the document
+                    text_processed = f"{'#' * level} {input('Text: ')}\n"
+                else:
+                    text_processed = f"{text_processed}\n{'#' * level} {input('Text: ')}\n"
+
+                print(text_processed)
+
+            elif formatter == 'ordered-list' or formatter == 'unordered-list':
+                while True:
+                    row_count = int(input("Number of rows: "))
+
+                    if row_count < 1:
+                        print("The number of rows should be greater than zero")
+                        continue
+                    else:
+                        break
+
+                for row in range(1, row_count + 1):
+                    if text_processed == '':
+                        if formatter == 'ordered-list':
+                            text_processed = f"{row}. {input('Text: ')}"
+                        else:
+                            text_processed = f"* {input('Text: ')}"
+                    else:
+                        if formatter == 'ordered-list':
+                            text_processed = f"{text_processed}\n{row}. {input('Text: ')}"
+                        else:
+                            text_processed = f"{text_processed}\n* {input('Text: ')}"
+
+                    if row == row_count:
+                        text_processed = f"{text_processed}\n"
+
+                    print(text_processed)
+
             else:
-                guest_dictionary[guest] = round(int(bill) / int(guest_count), 2)
+                text_processed = f"{text_processed}{options[formatter]}{input('Text: ')}{options[formatter]}"
 
-        if lucky_mode == 'Yes':
-            print(f"\n{lucky_person} is the lucky one!")
-        else:
-            print("\nNo one is going to be lucky")
-
-    else:
-        print("\nNo one is joining for the party")
-
-        quit()
+                print(text_processed)
 
 
 if __name__ == '__main__':
-    dinner_date()
+    editor()
